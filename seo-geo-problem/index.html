@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SEO Growth Animation — Hero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rdm-night: #01172F;
+    --rdm-ash: #BAC1B8;
+    --rdm-fern: #65743A;
+    --rdm-fern-bright: #8AA34F;
+    --rdm-rust: #AF4319;
+    --rdm-rust-bright: #D55428;
+    --rdm-cream: #F4EFE6;
+    --rdm-cream-warm: #FAF6EE;
+    --rdm-text-muted: #6B7280;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow: hidden;
+    /* Mimic the rust hero gradient so we can see how it sits in context */
+    background: linear-gradient(180deg, #AF4319 0%, #8B3614 100%);
+  }
+
+  /* The .stage is the actual embed container — sits inside your hero photo slot */
+  .stage {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    /* For Webflow embed, swap height: 100vh to a fixed value like 600px */
+    background: transparent;
+    overflow: hidden;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .scene {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 1080px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dashboard {
+    position: relative;
+    width: min(880px, 92%);
+    height: min(540px, 88%);
+  }
+
+  /* Main chart card — light/cream surface */
+  .chart-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background: var(--rdm-cream-warm);
+    border: 1px solid rgba(1, 23, 47, 0.08);
+    border-radius: 14px;
+    padding: 28px 32px;
+    box-shadow:
+      0 30px 80px rgba(1, 23, 47, 0.25),
+      0 12px 30px rgba(1, 23, 47, 0.15);
+    opacity: 0;
+    animation: cardFadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s forwards;
+  }
+
+  @keyframes cardFadeIn {
+    from { opacity: 0; transform: translate(-50%, -48%); }
+    to   { opacity: 1; transform: translate(-50%, -50%); }
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    gap: 20px;
+  }
+
+  .chart-title-block {
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 0.6s forwards;
+    min-width: 0;
+  }
+
+  .chart-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--rdm-rust);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .chart-label::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--rdm-rust);
+    box-shadow: 0 0 0 0 rgba(175, 67, 25, 0.6);
+    animation: pulse 1.8s ease-out infinite;
+  }
+
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(175, 67, 25, 0.7); }
+    70%  { box-shadow: 0 0 0 8px rgba(175, 67, 25, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(175, 67, 25, 0); }
+  }
+
+  .chart-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--rdm-night);
+    letter-spacing: -0.01em;
+  }
+
+  .chart-subtitle {
+    font-size: 12px;
+    color: var(--rdm-text-muted);
+    margin-top: 4px;
+  }
+
+  .chart-stats {
+    display: flex;
+    gap: 24px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 0.8s forwards;
+    flex-shrink: 0;
+  }
+
+  .stat {
+    text-align: right;
+  }
+
+  .stat-num {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--rdm-night);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .stat-num.accent { color: var(--rdm-rust); }
+  .stat-num.green { color: var(--rdm-fern); }
+
+  .stat-label {
+    font-size: 9px;
+    color: var(--rdm-text-muted);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-top: 4px;
+    font-weight: 600;
+  }
+
+  .chart-area {
+    position: relative;
+    width: 100%;
+    height: calc(100% - 100px);
+  }
+
+  .chart-svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .y-label {
+    fill: var(--rdm-text-muted);
+    font-size: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out 0.9s forwards;
+  }
+
+  .x-label {
+    fill: var(--rdm-text-muted);
+    font-size: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    opacity: 0;
+  }
+  .x-label-1 { animation: fadeIn 0.4s ease-out 1.0s forwards; }
+  .x-label-2 { animation: fadeIn 0.4s ease-out 1.15s forwards; }
+  .x-label-3 { animation: fadeIn 0.4s ease-out 1.3s forwards; }
+  .x-label-4 { animation: fadeIn 0.4s ease-out 1.45s forwards; }
+  .x-label-5 { animation: fadeIn 0.4s ease-out 1.6s forwards; }
+  .x-label-6 { animation: fadeIn 0.4s ease-out 1.75s forwards; }
+
+  .grid-line {
+    stroke: rgba(1, 23, 47, 0.08);
+    stroke-width: 1;
+    stroke-dasharray: 3 4;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out 0.7s forwards;
+  }
+
+  .chart-line {
+    fill: none;
+    stroke: var(--rdm-rust);
+    stroke-width: 2.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1800;
+    stroke-dashoffset: 1800;
+    animation: drawLine 2.4s cubic-bezier(0.65, 0, 0.35, 1) 1.2s forwards;
+  }
+
+  .chart-fill {
+    fill: url(#chartGrad);
+    opacity: 0;
+    animation: fadeFill 1s ease-out 3s forwards;
+  }
+
+  @keyframes drawLine { to { stroke-dashoffset: 0; } }
+  @keyframes fadeFill { to { opacity: 0.25; } }
+  @keyframes fadeIn { to { opacity: 1; } }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .data-point {
+    fill: var(--rdm-rust);
+    stroke: var(--rdm-cream-warm);
+    stroke-width: 2;
+    opacity: 0;
+  }
+  .data-point-1 { animation: pointIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) 1.6s forwards; }
+  .data-point-2 { animation: pointIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) 1.95s forwards; }
+  .data-point-3 { animation: pointIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) 2.3s forwards; }
+  .data-point-4 { animation: pointIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) 2.65s forwards; }
+  .data-point-5 { animation: pointIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) 3.0s forwards; }
+  .data-point-6 {
+    fill: var(--rdm-rust);
+    animation: pointPulse 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 3.4s forwards;
+  }
+
+  @keyframes pointIn {
+    from { opacity: 0; transform: scale(0); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes pointPulse {
+    0%   { opacity: 0; transform: scale(0); }
+    60%  { opacity: 1; transform: scale(1.6); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  .final-ring {
+    fill: none;
+    stroke: var(--rdm-rust);
+    stroke-width: 1.5;
+    opacity: 0;
+    animation: ringExpand 1s ease-out 3.4s forwards;
+  }
+
+  @keyframes ringExpand {
+    0%   { opacity: 0; r: 4; }
+    50%  { opacity: 0.6; r: 16; }
+    100% { opacity: 0.3; r: 22; }
+  }
+
+  /* Floating SERP card — dark navy for contrast against the cream dashboard */
+  .serp-card {
+    position: absolute;
+    top: -36px;
+    right: -16px;
+    width: 280px;
+    background: var(--rdm-night);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 14px 16px;
+    box-shadow: 0 16px 40px rgba(1, 23, 47, 0.4);
+    opacity: 0;
+    animation: cardSlideIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 4.0s forwards;
+    z-index: 10;
+  }
+
+  @keyframes cardSlideIn {
+    from { opacity: 0; transform: translateY(12px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .serp-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 9px;
+    color: var(--rdm-ash);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  .serp-search-icon {
+    width: 12px;
+    height: 12px;
+    color: var(--rdm-ash);
+  }
+
+  .serp-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 8px;
+    border-radius: 5px;
+    background: var(--rdm-rust);
+    color: var(--rdm-cream);
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .rank-query {
+    flex: 1;
+    color: var(--rdm-cream);
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .rank-arrow {
+    color: var(--rdm-fern-bright);
+    font-weight: 700;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  /* Floating metrics card — light/cream */
+  .metrics-card {
+    position: absolute;
+    bottom: -32px;
+    left: -20px;
+    background: var(--rdm-cream-warm);
+    border: 1px solid rgba(1, 23, 47, 0.08);
+    border-radius: 8px;
+    padding: 14px 18px;
+    box-shadow: 0 16px 40px rgba(1, 23, 47, 0.3);
+    opacity: 0;
+    animation: cardSlideIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 4.3s forwards;
+    z-index: 10;
+  }
+
+  .metrics-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .metric-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(175, 67, 25, 0.12);
+    border: 1px solid rgba(175, 67, 25, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .metric-info .metric-num {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--rdm-rust);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .metric-info .metric-label {
+    font-size: 9px;
+    color: var(--rdm-text-muted);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-top: 4px;
+    font-weight: 600;
+  }
+
+  /* Keyword tags */
+  .keyword-cluster {
+    position: absolute;
+    top: 50%;
+    right: -38px;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    opacity: 0;
+    animation: cardSlideIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 4.6s forwards;
+    z-index: 10;
+  }
+
+  .kw-tag {
+    background: var(--rdm-night);
+    color: var(--rdm-cream);
+    padding: 7px 14px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    box-shadow: 0 8px 20px rgba(1, 23, 47, 0.3);
+    white-space: nowrap;
+  }
+
+  .kw-tag.rust {
+    background: var(--rdm-rust);
+  }
+  .kw-tag.fern {
+    background: var(--rdm-fern);
+  }
+
+  /* Responsive: tuck floating cards inside on smaller widths */
+  @media (max-width: 900px) {
+    .serp-card { right: 0; width: 240px; }
+    .metrics-card { left: 0; }
+    .keyword-cluster { right: 0; }
+  }
+  @media (max-width: 640px) {
+    .chart-header { flex-direction: column; }
+    .chart-stats { align-self: flex-end; }
+    .serp-card { top: -20px; right: -10px; width: 200px; padding: 10px 12px; }
+    .serp-row { font-size: 11px; }
+    .metrics-card { bottom: -20px; left: -10px; padding: 10px 12px; }
+    .keyword-cluster { right: -10px; }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="scene">
+    <div class="dashboard">
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title-block">
+            <div class="chart-label">Organic Performance</div>
+            <div class="chart-title">Search Visibility Growth</div>
+            <div class="chart-subtitle">12-month rolling · Indexed clicks &amp; rankings</div>
+          </div>
+          <div class="chart-stats">
+            <div class="stat">
+              <div class="stat-num green">+606%</div>
+              <div class="stat-label">Clicks YoY</div>
+            </div>
+            <div class="stat">
+              <div class="stat-num accent">#1</div>
+              <div class="stat-label">Avg Position</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-area">
+          <svg class="chart-svg" viewBox="0 0 800 320" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#AF4319" stop-opacity="0.5"/>
+                <stop offset="100%" stop-color="#AF4319" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+
+            <text class="y-label" x="0" y="40">100K</text>
+            <text class="y-label" x="0" y="120">50K</text>
+            <text class="y-label" x="0" y="200">25K</text>
+            <text class="y-label" x="0" y="280">5K</text>
+
+            <line class="grid-line" x1="40" y1="40" x2="800" y2="40"/>
+            <line class="grid-line" x1="40" y1="120" x2="800" y2="120"/>
+            <line class="grid-line" x1="40" y1="200" x2="800" y2="200"/>
+            <line class="grid-line" x1="40" y1="280" x2="800" y2="280"/>
+
+            <text class="x-label x-label-1" x="80" y="310" text-anchor="middle">JAN</text>
+            <text class="x-label x-label-2" x="220" y="310" text-anchor="middle">MAR</text>
+            <text class="x-label x-label-3" x="360" y="310" text-anchor="middle">MAY</text>
+            <text class="x-label x-label-4" x="500" y="310" text-anchor="middle">JUL</text>
+            <text class="x-label x-label-5" x="640" y="310" text-anchor="middle">SEP</text>
+            <text class="x-label x-label-6" x="760" y="310" text-anchor="middle">NOV</text>
+
+            <path class="chart-fill" d="M 80,275 C 130,272 170,265 220,250 C 270,235 310,215 360,195 C 410,175 450,160 500,135 C 550,110 590,90 640,65 C 690,40 720,30 760,25 L 760,290 L 80,290 Z"/>
+            <path class="chart-line" d="M 80,275 C 130,272 170,265 220,250 C 270,235 310,215 360,195 C 410,175 450,160 500,135 C 550,110 590,90 640,65 C 690,40 720,30 760,25"/>
+
+            <circle class="data-point data-point-1" cx="80" cy="275" r="4"/>
+            <circle class="data-point data-point-2" cx="220" cy="250" r="4"/>
+            <circle class="data-point data-point-3" cx="360" cy="195" r="4"/>
+            <circle class="data-point data-point-4" cx="500" cy="135" r="4"/>
+            <circle class="data-point data-point-5" cx="640" cy="65" r="4"/>
+
+            <circle class="final-ring" cx="760" cy="25" r="4"/>
+            <circle class="data-point data-point-6" cx="760" cy="25" r="6"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="serp-card">
+        <div class="serp-header">
+          <svg class="serp-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m21 21-4.3-4.3"/>
+          </svg>
+          <span>SERP RANKINGS</span>
+        </div>
+        <div class="serp-row">
+          <span class="rank-badge">1</span>
+          <span class="rank-query">"top performing keyword"</span>
+          <span class="rank-arrow">▲ 14</span>
+        </div>
+        <div class="serp-row">
+          <span class="rank-badge">2</span>
+          <span class="rank-query">"high-intent buyer query"</span>
+          <span class="rank-arrow">▲ 8</span>
+        </div>
+        <div class="serp-row" style="margin-bottom: 0;">
+          <span class="rank-badge">3</span>
+          <span class="rank-query">"local service query"</span>
+          <span class="rank-arrow">▲ 22</span>
+        </div>
+      </div>
+
+      <div class="metrics-card">
+        <div class="metrics-row">
+          <div class="metric-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#AF4319" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+              <polyline points="16 7 22 7 22 13"/>
+            </svg>
+          </div>
+          <div class="metric-info">
+            <div class="metric-num">3.2x</div>
+            <div class="metric-label">Conversion Lift</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="keyword-cluster">
+        <span class="kw-tag rust">SEO</span>
+        <span class="kw-tag fern">GEO</span>
+        <span class="kw-tag">CONTENT</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>
