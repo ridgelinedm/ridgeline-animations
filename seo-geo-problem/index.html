@@ -32,7 +32,8 @@
     background: var(--rdm-white);
   }
 
-  /* The stage fills the entire iframe and centers the dashboard */
+  /* The stage fills the entire iframe and centers the dashboard.
+     Padding gives the drop shadow room to render before the iframe edge clips it. */
   .stage {
     position: relative;
     width: 100%;
@@ -42,7 +43,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: clamp(12px, 3vw, 24px);
+    padding: clamp(20px, 3vw, 32px);
   }
 
   /* Subtle grid backdrop */
@@ -381,18 +382,22 @@
      ============================================ */
   @media (max-width: 600px) {
     .stage {
-      padding: 10px;
+      padding: 16px;
     }
     .chart-card {
-      padding: 18px 18px;
+      padding: 16px 16px;
       border-radius: 10px;
     }
     /* Stack header — title on top, stats below */
     .chart-header {
       flex-direction: column;
       align-items: stretch;
-      gap: 14px;
-      margin-bottom: 14px;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    /* Hide subtitle on mobile to save space */
+    .chart-subtitle {
+      display: none;
     }
     .header-stats {
       align-self: stretch;
@@ -406,20 +411,30 @@
     .stat:last-child {
       text-align: right;
     }
-    /* Reduce x-label density even further on mobile */
+    /* Smaller stat numbers so chart gets more room */
+    .stat-num {
+      font-size: 14px;
+    }
+    /* Reduce x-label density */
     .x-label-2,
     .x-label-3,
     .x-label-5 {
       display: none;
     }
-    /* Smaller line labels */
     .line-label {
       font-size: 10px;
     }
-    /* Smaller axis labels */
     .y-label,
     .x-label {
       font-size: 9px;
+    }
+    /* Tighter footer */
+    .chart-footer {
+      margin-top: 10px;
+      padding-top: 10px;
+    }
+    .footer-caption {
+      font-size: 11px;
     }
   }
 
