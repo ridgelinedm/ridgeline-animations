@@ -3,21 +3,22 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SEO Growth Animation — Hero</title>
+<title>SEO/GEO Problem — Competitor Gap Animation</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800;9..40,900&display=swap" rel="stylesheet">
 <style>
   :root {
     --rdm-night: #01172F;
     --rdm-ash: #BAC1B8;
     --rdm-fern: #65743A;
-    --rdm-fern-bright: #8AA34F;
     --rdm-rust: #AF4319;
     --rdm-rust-bright: #D55428;
     --rdm-cream: #F4EFE6;
-    --rdm-cream-warm: #FAF6EE;
+    --rdm-white: #FFFFFF;
+    --rdm-surface: #FAFAF8;
     --rdm-text-muted: #6B7280;
+    --rdm-text-fade: #9CA3AF;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -26,23 +27,33 @@
     height: 100%;
     font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     overflow: hidden;
-    /* Mimic the rust hero gradient so we can see how it sits in context */
-    background: linear-gradient(180deg, #AF4319 0%, #8B3614 100%);
+    background: var(--rdm-white);
   }
 
-  /* The .stage is the actual embed container — sits inside your hero photo slot */
   .stage {
     position: relative;
     width: 100%;
     height: 100vh;
-    /* For Webflow embed, swap height: 100vh to a fixed value like 600px */
     background: transparent;
     overflow: hidden;
-    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 24px;
+  }
+
+  /* Subtle grid backdrop */
+  .stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(1, 23, 47, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(1, 23, 47, 0.035) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);
+    pointer-events: none;
   }
 
   .scene {
@@ -57,32 +68,30 @@
 
   .dashboard {
     position: relative;
-    width: min(880px, 92%);
-    height: min(540px, 88%);
+    width: min(900px, 100%);
+    height: min(560px, 95%);
   }
 
-  /* Main chart card — light/cream surface */
+  /* Main chart card */
   .chart-card {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     width: 100%;
     height: 100%;
-    background: var(--rdm-cream-warm);
-    border: 1px solid rgba(1, 23, 47, 0.08);
+    background: var(--rdm-surface);
+    border: 1px solid rgba(1, 23, 47, 0.10);
     border-radius: 14px;
     padding: 28px 32px;
     box-shadow:
-      0 30px 80px rgba(1, 23, 47, 0.25),
-      0 12px 30px rgba(1, 23, 47, 0.15);
+      0 20px 50px rgba(1, 23, 47, 0.08),
+      0 8px 20px rgba(1, 23, 47, 0.04);
     opacity: 0;
     animation: cardFadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s forwards;
+    display: flex;
+    flex-direction: column;
   }
 
   @keyframes cardFadeIn {
-    from { opacity: 0; transform: translate(-50%, -48%); }
-    to   { opacity: 1; transform: translate(-50%, -50%); }
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   .chart-header {
@@ -91,6 +100,7 @@
     align-items: flex-start;
     margin-bottom: 24px;
     gap: 20px;
+    flex-shrink: 0;
   }
 
   .chart-title-block {
@@ -100,8 +110,9 @@
   }
 
   .chart-label {
+    font-family: 'DM Sans', sans-serif;
     font-size: 10px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--rdm-rust);
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -128,23 +139,28 @@
   }
 
   .chart-title {
-    font-size: 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 22px;
     font-weight: 700;
     color: var(--rdm-night);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
   }
 
   .chart-subtitle {
+    font-family: 'DM Sans', sans-serif;
     font-size: 12px;
     color: var(--rdm-text-muted);
     margin-top: 4px;
+    font-weight: 500;
   }
 
-  .chart-stats {
+  /* Stats block — pulled into header instead of floating cards */
+  .header-stats {
     display: flex;
-    gap: 24px;
+    gap: 28px;
     opacity: 0;
-    animation: fadeUp 0.6s ease-out 0.8s forwards;
+    animation: fadeUp 0.6s ease-out 0.85s forwards;
     flex-shrink: 0;
   }
 
@@ -153,16 +169,18 @@
   }
 
   .stat-num {
-    font-size: 26px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 24px;
     font-weight: 800;
-    color: var(--rdm-night);
     letter-spacing: -0.02em;
     line-height: 1;
   }
-  .stat-num.accent { color: var(--rdm-rust); }
-  .stat-num.green { color: var(--rdm-fern); }
+
+  .stat-num.competitor { color: var(--rdm-rust); }
+  .stat-num.you { color: var(--rdm-text-fade); }
 
   .stat-label {
+    font-family: 'DM Sans', sans-serif;
     font-size: 9px;
     color: var(--rdm-text-muted);
     letter-spacing: 0.14em;
@@ -171,10 +189,12 @@
     font-weight: 600;
   }
 
+  /* Chart area */
   .chart-area {
     position: relative;
     width: 100%;
-    height: calc(100% - 100px);
+    flex: 1;
+    min-height: 0;
   }
 
   .chart-svg {
@@ -208,14 +228,28 @@
   .x-label-6 { animation: fadeIn 0.4s ease-out 1.75s forwards; }
 
   .grid-line {
-    stroke: rgba(1, 23, 47, 0.08);
+    stroke: rgba(1, 23, 47, 0.06);
     stroke-width: 1;
     stroke-dasharray: 3 4;
     opacity: 0;
     animation: fadeIn 0.5s ease-out 0.7s forwards;
   }
 
-  .chart-line {
+  /* "You" noisy spiky line */
+  .line-you {
+    fill: none;
+    stroke: var(--rdm-text-fade);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1600;
+    stroke-dashoffset: 1600;
+    opacity: 0.8;
+    animation: drawYou 2.4s cubic-bezier(0.65, 0, 0.35, 1) 1.2s forwards;
+  }
+
+  /* "Competitor" climbing line — bold, rust */
+  .line-competitor {
     fill: none;
     stroke: var(--rdm-rust);
     stroke-width: 2.8;
@@ -223,37 +257,52 @@
     stroke-linejoin: round;
     stroke-dasharray: 1800;
     stroke-dashoffset: 1800;
-    animation: drawLine 2.4s cubic-bezier(0.65, 0, 0.35, 1) 1.2s forwards;
+    animation: drawCompetitor 2.6s cubic-bezier(0.65, 0, 0.35, 1) 1.5s forwards;
   }
 
-  .chart-fill {
-    fill: url(#chartGrad);
+  /* Gradient fill under competitor line */
+  .competitor-fill {
+    fill: url(#compGrad);
     opacity: 0;
-    animation: fadeFill 1s ease-out 3s forwards;
+    animation: fadeFill 1.2s ease-out 3.6s forwards;
   }
 
-  @keyframes drawLine { to { stroke-dashoffset: 0; } }
-  @keyframes fadeFill { to { opacity: 0.25; } }
+  @keyframes drawYou {
+    to { stroke-dashoffset: 0; }
+  }
+  @keyframes drawCompetitor {
+    to { stroke-dashoffset: 0; }
+  }
+  @keyframes fadeFill { to { opacity: 0.15; } }
   @keyframes fadeIn { to { opacity: 1; } }
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  .data-point {
-    fill: var(--rdm-rust);
-    stroke: var(--rdm-cream-warm);
+  /* Endpoint markers */
+  .endpoint-you {
+    fill: var(--rdm-text-fade);
+    stroke: var(--rdm-surface);
     stroke-width: 2;
     opacity: 0;
+    animation: pointIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 3.6s forwards;
   }
-  .data-point-1 { animation: pointIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) 1.6s forwards; }
-  .data-point-2 { animation: pointIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) 1.95s forwards; }
-  .data-point-3 { animation: pointIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) 2.3s forwards; }
-  .data-point-4 { animation: pointIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) 2.65s forwards; }
-  .data-point-5 { animation: pointIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) 3.0s forwards; }
-  .data-point-6 {
+
+  .endpoint-competitor {
     fill: var(--rdm-rust);
-    animation: pointPulse 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 3.4s forwards;
+    stroke: var(--rdm-surface);
+    stroke-width: 2;
+    opacity: 0;
+    animation: pointPulse 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 4.1s forwards;
+  }
+
+  .endpoint-ring {
+    fill: none;
+    stroke: var(--rdm-rust);
+    stroke-width: 1.5;
+    opacity: 0;
+    animation: ringExpand 1.2s ease-out 4.1s forwards;
   }
 
   @keyframes pointIn {
@@ -265,198 +314,84 @@
     60%  { opacity: 1; transform: scale(1.6); }
     100% { opacity: 1; transform: scale(1); }
   }
-
-  .final-ring {
-    fill: none;
-    stroke: var(--rdm-rust);
-    stroke-width: 1.5;
-    opacity: 0;
-    animation: ringExpand 1s ease-out 3.4s forwards;
-  }
-
   @keyframes ringExpand {
     0%   { opacity: 0; r: 4; }
-    50%  { opacity: 0.6; r: 16; }
-    100% { opacity: 0.3; r: 22; }
+    50%  { opacity: 0.5; r: 18; }
+    100% { opacity: 0.25; r: 24; }
   }
 
-  /* Floating SERP card — dark navy for contrast against the cream dashboard */
-  .serp-card {
-    position: absolute;
-    top: -36px;
-    right: -16px;
-    width: 280px;
-    background: var(--rdm-night);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
-    padding: 14px 16px;
-    box-shadow: 0 16px 40px rgba(1, 23, 47, 0.4);
-    opacity: 0;
-    animation: cardSlideIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 4.0s forwards;
-    z-index: 10;
-  }
-
-  @keyframes cardSlideIn {
-    from { opacity: 0; transform: translateY(12px) scale(0.96); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-
-  .serp-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 9px;
-    color: var(--rdm-ash);
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-    font-weight: 600;
-  }
-
-  .serp-search-icon {
-    width: 12px;
-    height: 12px;
-    color: var(--rdm-ash);
-  }
-
-  .serp-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-  }
-
-  .rank-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 26px;
-    height: 26px;
-    padding: 0 8px;
-    border-radius: 5px;
-    background: var(--rdm-rust);
-    color: var(--rdm-cream);
+  /* Inline labels on the lines */
+  .line-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
     font-weight: 700;
-    font-size: 13px;
-    flex-shrink: 0;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0;
+  }
+  .line-label-competitor {
+    fill: var(--rdm-rust);
+    animation: fadeIn 0.5s ease-out 4.3s forwards;
+  }
+  .line-label-you {
+    fill: var(--rdm-text-muted);
+    animation: fadeIn 0.5s ease-out 3.8s forwards;
   }
 
-  .rank-query {
-    flex: 1;
-    color: var(--rdm-cream);
-    font-size: 13px;
+  /* Footer caption inside the card */
+  .chart-footer {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(1, 23, 47, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 4.5s forwards;
+  }
+
+  .footer-caption {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--rdm-night);
     font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.4;
   }
 
-  .rank-arrow {
-    color: var(--rdm-fern-bright);
-    font-weight: 700;
-    font-size: 11px;
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    flex-shrink: 0;
-  }
-
-  /* Floating metrics card — light/cream */
-  .metrics-card {
-    position: absolute;
-    bottom: -32px;
-    left: -20px;
-    background: var(--rdm-cream-warm);
-    border: 1px solid rgba(1, 23, 47, 0.08);
-    border-radius: 8px;
-    padding: 14px 18px;
-    box-shadow: 0 16px 40px rgba(1, 23, 47, 0.3);
-    opacity: 0;
-    animation: cardSlideIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 4.3s forwards;
-    z-index: 10;
-  }
-
-  .metrics-row {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-
-  .metric-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    background: rgba(175, 67, 25, 0.12);
-    border: 1px solid rgba(175, 67, 25, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .metric-info .metric-num {
-    font-size: 22px;
-    font-weight: 800;
+  .footer-caption .emph {
     color: var(--rdm-rust);
-    letter-spacing: -0.02em;
-    line-height: 1;
+    font-weight: 700;
   }
 
-  .metric-info .metric-label {
-    font-size: 9px;
+  .footer-meta {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
     color: var(--rdm-text-muted);
-    letter-spacing: 0.14em;
+    font-weight: 600;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    margin-top: 4px;
-    font-weight: 600;
-  }
-
-  /* Keyword tags */
-  .keyword-cluster {
-    position: absolute;
-    top: 50%;
-    right: -38px;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    opacity: 0;
-    animation: cardSlideIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 4.6s forwards;
-    z-index: 10;
-  }
-
-  .kw-tag {
-    background: var(--rdm-night);
-    color: var(--rdm-cream);
-    padding: 7px 14px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    box-shadow: 0 8px 20px rgba(1, 23, 47, 0.3);
     white-space: nowrap;
+    flex-shrink: 0;
   }
 
-  .kw-tag.rust {
-    background: var(--rdm-rust);
-  }
-  .kw-tag.fern {
-    background: var(--rdm-fern);
-  }
-
-  /* Responsive: tuck floating cards inside on smaller widths */
-  @media (max-width: 900px) {
-    .serp-card { right: 0; width: 240px; }
-    .metrics-card { left: 0; }
-    .keyword-cluster { right: 0; }
-  }
-  @media (max-width: 640px) {
+  /* Responsive */
+  @media (max-width: 700px) {
     .chart-header { flex-direction: column; }
-    .chart-stats { align-self: flex-end; }
-    .serp-card { top: -20px; right: -10px; width: 200px; padding: 10px 12px; }
-    .serp-row { font-size: 11px; }
-    .metrics-card { bottom: -20px; left: -10px; padding: 10px 12px; }
-    .keyword-cluster { right: -10px; }
+    .header-stats { align-self: flex-end; gap: 18px; }
+    .stat-num { font-size: 20px; }
+    .chart-title { font-size: 18px; }
+    .chart-footer { flex-direction: column; align-items: flex-start; }
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 </style>
 </head>
@@ -468,18 +403,18 @@
       <div class="chart-card">
         <div class="chart-header">
           <div class="chart-title-block">
-            <div class="chart-label">Organic Performance</div>
-            <div class="chart-title">Search Visibility Growth</div>
-            <div class="chart-subtitle">12-month rolling · Indexed clicks &amp; rankings</div>
+            <div class="chart-label">12-Month Search Visibility</div>
+            <div class="chart-title">Where the demand is going</div>
+            <div class="chart-subtitle">Organic clicks · You vs. your nearest competitor</div>
           </div>
-          <div class="chart-stats">
+          <div class="header-stats">
             <div class="stat">
-              <div class="stat-num green">+606%</div>
-              <div class="stat-label">Clicks YoY</div>
+              <div class="stat-num you">Flat</div>
+              <div class="stat-label">Your Growth · 12mo</div>
             </div>
             <div class="stat">
-              <div class="stat-num accent">#1</div>
-              <div class="stat-label">Avg Position</div>
+              <div class="stat-num competitor">↑ Compounding</div>
+              <div class="stat-label">Their Growth · 12mo</div>
             </div>
           </div>
         </div>
@@ -487,88 +422,58 @@
         <div class="chart-area">
           <svg class="chart-svg" viewBox="0 0 800 320" preserveAspectRatio="none">
             <defs>
-              <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#AF4319" stop-opacity="0.5"/>
+              <linearGradient id="compGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#AF4319" stop-opacity="0.4"/>
                 <stop offset="100%" stop-color="#AF4319" stop-opacity="0"/>
               </linearGradient>
             </defs>
 
-            <text class="y-label" x="0" y="40">100K</text>
-            <text class="y-label" x="0" y="120">50K</text>
-            <text class="y-label" x="0" y="200">25K</text>
-            <text class="y-label" x="0" y="280">5K</text>
+            <!-- Y-axis labels -->
+            <text class="y-label" x="0" y="40">HIGH</text>
+            <text class="y-label" x="0" y="200">MID</text>
+            <text class="y-label" x="0" y="280">LOW</text>
 
+            <!-- Grid lines -->
             <line class="grid-line" x1="40" y1="40" x2="800" y2="40"/>
-            <line class="grid-line" x1="40" y1="120" x2="800" y2="120"/>
             <line class="grid-line" x1="40" y1="200" x2="800" y2="200"/>
             <line class="grid-line" x1="40" y1="280" x2="800" y2="280"/>
 
-            <text class="x-label x-label-1" x="80" y="310" text-anchor="middle">JAN</text>
-            <text class="x-label x-label-2" x="220" y="310" text-anchor="middle">MAR</text>
-            <text class="x-label x-label-3" x="360" y="310" text-anchor="middle">MAY</text>
-            <text class="x-label x-label-4" x="500" y="310" text-anchor="middle">JUL</text>
-            <text class="x-label x-label-5" x="640" y="310" text-anchor="middle">SEP</text>
-            <text class="x-label x-label-6" x="760" y="310" text-anchor="middle">NOV</text>
+            <!-- X-axis labels -->
+            <text class="x-label x-label-1" x="80" y="310" text-anchor="middle">12 MO AGO</text>
+            <text class="x-label x-label-2" x="220" y="310" text-anchor="middle">10 MO</text>
+            <text class="x-label x-label-3" x="360" y="310" text-anchor="middle">8 MO</text>
+            <text class="x-label x-label-4" x="500" y="310" text-anchor="middle">6 MO</text>
+            <text class="x-label x-label-5" x="640" y="310" text-anchor="middle">3 MO</text>
+            <text class="x-label x-label-6" x="760" y="310" text-anchor="middle">TODAY</text>
 
-            <path class="chart-fill" d="M 80,275 C 130,272 170,265 220,250 C 270,235 310,215 360,195 C 410,175 450,160 500,135 C 550,110 590,90 640,65 C 690,40 720,30 760,25 L 760,290 L 80,290 Z"/>
-            <path class="chart-line" d="M 80,275 C 130,272 170,265 220,250 C 270,235 310,215 360,195 C 410,175 450,160 500,135 C 550,110 590,90 640,65 C 690,40 720,30 760,25"/>
+            <!-- Competitor fill -->
+            <path class="competitor-fill" d="M 80,265 C 130,260 170,250 220,235 C 270,220 310,195 360,170 C 410,150 450,130 500,105 C 550,85 590,65 640,50 C 690,35 720,28 760,22 L 760,290 L 80,290 Z"/>
 
-            <circle class="data-point data-point-1" cx="80" cy="275" r="4"/>
-            <circle class="data-point data-point-2" cx="220" cy="250" r="4"/>
-            <circle class="data-point data-point-3" cx="360" cy="195" r="4"/>
-            <circle class="data-point data-point-4" cx="500" cy="135" r="4"/>
-            <circle class="data-point data-point-5" cx="640" cy="65" r="4"/>
+            <!-- "Your" noisy spiky line — drawn first, behind -->
+            <!-- Hovers around y=270-285, with occasional spikes to y=255-265 mimicking real GSC data -->
+            <path class="line-you" d="M 80,285 L 95,285 L 105,275 L 115,283 L 125,285 L 135,278 L 145,272 L 155,285 L 165,283 L 175,265 L 185,270 L 195,285 L 205,285 L 215,280 L 225,272 L 235,265 L 245,283 L 255,285 L 265,278 L 275,285 L 285,275 L 295,282 L 305,285 L 315,272 L 325,285 L 335,283 L 345,270 L 355,285 L 365,278 L 375,265 L 385,283 L 395,285 L 405,272 L 415,285 L 425,280 L 435,275 L 445,285 L 455,283 L 465,268 L 475,278 L 485,285 L 495,275 L 505,283 L 515,272 L 525,285 L 535,278 L 545,283 L 555,270 L 565,285 L 575,283 L 585,275 L 595,285 L 605,272 L 615,283 L 625,278 L 635,285 L 645,275 L 655,283 L 665,260 L 675,275 L 685,285 L 695,278 L 705,283 L 715,272 L 725,285 L 735,275 L 745,283 L 760,278"/>
 
-            <circle class="final-ring" cx="760" cy="25" r="4"/>
-            <circle class="data-point data-point-6" cx="760" cy="25" r="6"/>
+            <!-- "Competitor" climbing line — drawn second, in front -->
+            <path class="line-competitor" d="M 80,265 C 130,260 170,250 220,235 C 270,220 310,195 360,170 C 410,150 450,130 500,105 C 550,85 590,65 640,50 C 690,35 720,28 760,22"/>
+
+            <!-- Inline labels next to endpoints -->
+            <text class="line-label line-label-you" x="745" y="270" text-anchor="end">YOU</text>
+            <text class="line-label line-label-competitor" x="745" y="14" text-anchor="end">COMPETITOR</text>
+
+            <!-- Endpoint: You -->
+            <circle class="endpoint-you" cx="760" cy="278" r="4"/>
+
+            <!-- Endpoint: Competitor -->
+            <circle class="endpoint-ring" cx="760" cy="22" r="4"/>
+            <circle class="endpoint-competitor" cx="760" cy="22" r="6"/>
           </svg>
         </div>
-      </div>
 
-      <div class="serp-card">
-        <div class="serp-header">
-          <svg class="serp-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="7"/>
-            <path d="m21 21-4.3-4.3"/>
-          </svg>
-          <span>SERP RANKINGS</span>
-        </div>
-        <div class="serp-row">
-          <span class="rank-badge">1</span>
-          <span class="rank-query">"top performing keyword"</span>
-          <span class="rank-arrow">▲ 14</span>
-        </div>
-        <div class="serp-row">
-          <span class="rank-badge">2</span>
-          <span class="rank-query">"high-intent buyer query"</span>
-          <span class="rank-arrow">▲ 8</span>
-        </div>
-        <div class="serp-row" style="margin-bottom: 0;">
-          <span class="rank-badge">3</span>
-          <span class="rank-query">"local service query"</span>
-          <span class="rank-arrow">▲ 22</span>
-        </div>
-      </div>
-
-      <div class="metrics-card">
-        <div class="metrics-row">
-          <div class="metric-icon">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#AF4319" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
-              <polyline points="16 7 22 7 22 13"/>
-            </svg>
-          </div>
-          <div class="metric-info">
-            <div class="metric-num">3.2x</div>
-            <div class="metric-label">Conversion Lift</div>
+        <div class="chart-footer">
+          <div class="footer-caption">
+            They're showing up in the searches <span class="emph">you should be winning</span>.
           </div>
         </div>
-      </div>
-
-      <div class="keyword-cluster">
-        <span class="kw-tag rust">SEO</span>
-        <span class="kw-tag fern">GEO</span>
-        <span class="kw-tag">CONTENT</span>
       </div>
 
     </div>
