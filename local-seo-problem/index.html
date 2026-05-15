@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Local SEO Problem — Local Pack Visibility Gap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rdm-night: #01172F;
+    --rdm-night-soft: #1a3050;
+    --rdm-ash: #BAC1B8;
+    --rdm-ash-deep: #8A938A;
+    --rdm-fern: #65743A;
+    --rdm-rust: #AF4319;
+    --rdm-rust-bright: #D55428;
+    --rdm-cream: #F4EFE6;
+    --rdm-white: #FFFFFF;
+    --rdm-surface: #FAFAF8;
+    --rdm-map-land: #EEF1ED;
+    --rdm-map-water: #D9E4EE;
+    --rdm-map-road: #FFFFFF;
+    --rdm-map-park: #DCE5D3;
+    --rdm-text-muted: #6B7280;
+    --rdm-text-fade: #9CA3AF;
+    --rdm-border: #E5E7EB;
+    --rdm-star: #F2B544;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    width: 100%;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow: hidden;
+    background: var(--rdm-white);
+    color: var(--rdm-night);
+  }
+
+  .stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(24px, 4vw, 36px);
+  }
+
+  /* Subtle grid backdrop, matches the SEO/GEO animation */
+  .stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(1, 23, 47, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(1, 23, 47, 0.035) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);
+    pointer-events: none;
+  }
+
+  /* Unified outer card that lifts the whole composition off the page */
+  .card {
+    position: relative;
+    width: 100%;
+    max-width: 920px;
+    background: var(--rdm-white);
+    border: 1px solid rgba(1, 23, 47, 0.08);
+    border-radius: 16px;
+    padding: clamp(16px, 2.5vw, 24px);
+    box-shadow:
+      0 12px 32px rgba(1, 23, 47, 0.05),
+      0 4px 12px rgba(1, 23, 47, 0.03);
+    opacity: 0;
+    animation: fadeIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s forwards;
+  }
+
+  /* Main composition: map left, pack list right (inside the card) */
+  .composition {
+    position: relative;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 16px;
+  }
+
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+
+  /* ==== SEARCH BAR ==== */
+  .search-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    background: var(--rdm-white);
+    border: 1px solid var(--rdm-border);
+    border-radius: 24px;
+    box-shadow: 0 1px 3px rgba(1, 23, 47, 0.04);
+  }
+  .search-icon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    color: var(--rdm-text-fade);
+  }
+  .search-query {
+    font-size: 14px;
+    color: var(--rdm-night);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .search-query .typed {
+    border-right: 2px solid var(--rdm-night);
+    animation: typeCaret 0.6s steps(2) infinite;
+  }
+  @keyframes typeCaret {
+    50% { border-color: transparent; }
+  }
+  .search-query.done .typed {
+    border-right-color: transparent;
+    animation: none;
+  }
+  .search-pill {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: #EAF1FB;
+    color: #1A4B8C;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .search-pill-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #1A4B8C;
+  }
+
+  /* ==== MAP ==== */
+  .map-panel {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    background: var(--rdm-map-land);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--rdm-border);
+  }
+  .map-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Map pin styles — pins fade in via opacity only.
+     We avoid animating transform because the SVG <g> elements already
+     have transform="translate(x,y)" positional attributes that would
+     be overridden by a CSS transform animation. */
+  .pin {
+    opacity: 0;
+  }
+  .pin.drop {
+    animation: pinFadeIn 0.5s ease-out forwards;
+  }
+  @keyframes pinFadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  /* Inner circle gets a subtle scale-pop via its own transform-box trick */
+  .pin-marker {
+    transform-box: fill-box;
+    transform-origin: center;
+    transform: scale(0.4);
+  }
+  .pin.drop .pin-marker {
+    animation: pinPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  @keyframes pinPop {
+    0%   { transform: scale(0.4); }
+    100% { transform: scale(1); }
+  }
+  .pin-comp-1.drop,
+  .pin-comp-1.drop .pin-marker { animation-delay: 1.2s; }
+  .pin-comp-2.drop,
+  .pin-comp-2.drop .pin-marker { animation-delay: 1.5s; }
+  .pin-comp-3.drop,
+  .pin-comp-3.drop .pin-marker { animation-delay: 1.8s; }
+  .pin-you.drop,
+  .pin-you.drop .pin-marker { animation-delay: 2.8s; }
+
+  /* Page 2 indicator — bottom-right corner of the map */
+  .page-indicator {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: var(--rdm-white);
+    border: 1px solid var(--rdm-border);
+    border-radius: 14px;
+    font-size: 11px;
+    color: var(--rdm-text-muted);
+    font-weight: 500;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out 3.2s forwards;
+    box-shadow: 0 1px 2px rgba(1, 23, 47, 0.04);
+  }
+  .page-indicator .arrow {
+    color: var(--rdm-rust);
+    font-weight: 600;
+  }
+
+  /* ==== LOCAL PACK ==== */
+  .pack-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .pack-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 4px;
+    font-size: 11px;
+    color: var(--rdm-text-muted);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .pack-header-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--rdm-text-muted);
+  }
+  .pack-header-tag-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--rdm-fern);
+  }
+  .pack-header-link {
+    color: var(--rdm-text-fade);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 11px;
+  }
+
+  /* Pack result card */
+  .pack-card {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    gap: 10px;
+    align-items: start;
+    padding: 12px 14px;
+    background: var(--rdm-white);
+    border: 1px solid var(--rdm-border);
+    border-radius: 10px;
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  .pack-card.reveal {
+    animation: cardReveal 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+  @keyframes cardReveal {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .pack-card-1.reveal { animation-delay: 1.25s; }
+  .pack-card-2.reveal { animation-delay: 1.55s; }
+  .pack-card-3.reveal { animation-delay: 1.85s; }
+
+  .pack-rank {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--rdm-night);
+    color: var(--rdm-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    margin-top: 1px;
+  }
+
+  .pack-body {
+    min-width: 0;
+  }
+  .pack-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--rdm-night);
+    line-height: 1.25;
+    margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pack-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--rdm-text-muted);
+    line-height: 1.3;
+    flex-wrap: wrap;
+  }
+  .pack-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: var(--rdm-night);
+    font-weight: 500;
+  }
+  .pack-star {
+    color: var(--rdm-star);
+    font-size: 13px;
+    line-height: 1;
+  }
+  .pack-reviews {
+    color: var(--rdm-text-muted);
+  }
+  .pack-sep {
+    color: var(--rdm-text-fade);
+  }
+  .pack-status {
+    color: var(--rdm-fern);
+    font-weight: 500;
+  }
+  .pack-photo {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--rdm-ash) 0%, var(--rdm-ash-deep) 100%);
+    margin-top: 1px;
+    position: relative;
+    overflow: hidden;
+  }
+  .pack-photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 30% 60%, rgba(255,255,255,0.4) 0%, transparent 35%),
+      radial-gradient(circle at 70% 30%, rgba(1,23,47,0.15) 0%, transparent 40%);
+  }
+  /* Vary photo color per card for visual differentiation */
+  .pack-card-1 .pack-photo {
+    background: linear-gradient(135deg, #6B8E7F 0%, #4A6A5E 100%);
+  }
+  .pack-card-2 .pack-photo {
+    background: linear-gradient(135deg, #8A7B5C 0%, #5F5239 100%);
+  }
+  .pack-card-3 .pack-photo {
+    background: linear-gradient(135deg, #7C8FA5 0%, #4E5F75 100%);
+  }
+
+  /* ==== "YOU" CARD ==== */
+  .pack-divider {
+    height: 1px;
+    background: var(--rdm-border);
+    margin: 14px 4px 8px;
+    position: relative;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out 2.4s forwards;
+  }
+  .pack-divider::after {
+    content: 'Page 2 of local results';
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--rdm-white);
+    padding: 0 10px;
+    font-size: 10px;
+    color: var(--rdm-text-fade);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .you-card {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    gap: 10px;
+    align-items: start;
+    padding: 12px 14px;
+    background: var(--rdm-white);
+    border: 1px solid var(--rdm-border);
+    border-radius: 10px;
+    opacity: 0;
+    transform: translateY(8px);
+    position: relative;
+  }
+  .you-card.reveal {
+    animation: cardReveal 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 2.6s forwards;
+  }
+  .you-rank {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--rdm-ash);
+    color: var(--rdm-night);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    margin-top: 1px;
+  }
+  .you-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--rdm-night);
+    line-height: 1.25;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .you-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    background: rgba(175, 67, 25, 0.1);
+    color: var(--rdm-rust);
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 4px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .you-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--rdm-text-muted);
+    flex-wrap: wrap;
+  }
+  .you-meta .missing {
+    color: var(--rdm-rust);
+    font-weight: 500;
+  }
+  .you-photo {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    background: repeating-linear-gradient(
+      45deg,
+      var(--rdm-border),
+      var(--rdm-border) 4px,
+      var(--rdm-surface) 4px,
+      var(--rdm-surface) 8px
+    );
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .you-photo svg {
+    width: 18px;
+    height: 18px;
+    color: var(--rdm-text-fade);
+  }
+
+  /* Issue callouts that appear ABOVE the cards, not floating over them */
+  .issues-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: 8px;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out 3.4s forwards;
+  }
+  .issue {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    background: rgba(175, 67, 25, 0.06);
+    border: 1px solid rgba(175, 67, 25, 0.15);
+    border-radius: 6px;
+    font-size: 11px;
+    color: var(--rdm-rust);
+    font-weight: 500;
+    line-height: 1.2;
+  }
+  .issue-x {
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+    color: var(--rdm-rust);
+  }
+
+  /* ==== RESPONSIVE BREAKPOINTS ==== */
+
+  /* Tablet: stack but keep both panels */
+  @media (max-width: 760px) {
+    .composition {
+      grid-template-columns: 1fr;
+      max-width: 480px;
+      gap: 12px;
+    }
+    .map-panel {
+      aspect-ratio: 16 / 10;
+    }
+    .pack-card,
+    .you-card {
+      padding: 10px 12px;
+    }
+  }
+
+  /* Mobile */
+  @media (max-width: 480px) {
+    .stage {
+      padding: 10px;
+    }
+    .composition {
+      gap: 10px;
+    }
+    .search-bar-wrap {
+      padding: 8px 12px;
+    }
+    .search-query {
+      font-size: 13px;
+    }
+    .search-pill {
+      font-size: 10px;
+      padding: 3px 8px;
+    }
+    .pack-name,
+    .you-name {
+      font-size: 13px;
+    }
+    .pack-meta,
+    .you-meta {
+      font-size: 11px;
+    }
+    .issues-strip {
+      grid-template-columns: 1fr;
+    }
+    .pack-photo,
+    .you-photo {
+      width: 38px;
+      height: 38px;
+    }
+  }
+
+  /* Reduced motion: show final state, no animation */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001s !important;
+      animation-delay: 0s !important;
+      transition-duration: 0.001s !important;
+    }
+    .composition,
+    .pack-card,
+    .you-card,
+    .pin,
+    .page-indicator,
+    .pack-divider,
+    .issues-strip {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="stage" role="img" aria-label="Local search results showing three competitors ranked in the local pack with strong review profiles, while 'Your business' sits on page two with missing photos, inconsistent address, and no reviews.">
+    <div class="card">
+
+      <!-- Search bar (sits above the grid, inside the card) -->
+      <div class="search-bar-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <div class="search-query" id="searchQuery">
+          <span id="typedText"></span><span class="typed" aria-hidden="true">&nbsp;</span>
+        </div>
+        <div class="search-pill" aria-label="Near you">
+          <span class="search-pill-dot"></span>
+          Near you
+        </div>
+      </div>
+
+      <div class="composition">
+
+        <!-- MAP PANEL (left) -->
+      <div class="map-panel" aria-hidden="true">
+        <svg class="map-svg" viewBox="-30 -30 460 460" preserveAspectRatio="xMidYMid slice">
+          <!-- Background land -->
+          <rect x="-30" y="-30" width="460" height="460" fill="var(--rdm-map-land)"/>
+
+          <!-- Park / green space -->
+          <path d="M 240 30 Q 300 50 320 120 Q 340 180 290 210 Q 240 220 220 170 Q 210 100 240 30 Z" fill="var(--rdm-map-park)"/>
+
+          <!-- Small park bottom-left -->
+          <path d="M 30 320 Q 80 310 100 350 Q 90 390 50 385 Q 20 370 30 320 Z" fill="var(--rdm-map-park)"/>
+
+          <!-- Water -->
+          <path d="M -30 280 Q 60 260 120 290 Q 180 310 140 380 Q 80 430 -30 410 Z" fill="var(--rdm-map-water)" opacity="0.7"/>
+
+          <!-- Roads — major -->
+          <line x1="-30" y1="180" x2="430" y2="170" stroke="var(--rdm-map-road)" stroke-width="14"/>
+          <line x1="180" y1="-30" x2="220" y2="430" stroke="var(--rdm-map-road)" stroke-width="12"/>
+          <line x1="-30" y1="80" x2="430" y2="95" stroke="var(--rdm-map-road)" stroke-width="6"/>
+          <line x1="80" y1="-30" x2="100" y2="430" stroke="var(--rdm-map-road)" stroke-width="6"/>
+          <line x1="320" y1="-30" x2="340" y2="430" stroke="var(--rdm-map-road)" stroke-width="6"/>
+          <line x1="-30" y1="280" x2="430" y2="295" stroke="var(--rdm-map-road)" stroke-width="6"/>
+
+          <!-- Roads — minor -->
+          <line x1="-30" y1="40" x2="430" y2="45" stroke="var(--rdm-map-road)" stroke-width="2.5" opacity="0.7"/>
+          <line x1="-30" y1="130" x2="430" y2="140" stroke="var(--rdm-map-road)" stroke-width="2.5" opacity="0.7"/>
+          <line x1="-30" y1="230" x2="430" y2="235" stroke="var(--rdm-map-road)" stroke-width="2.5" opacity="0.7"/>
+          <line x1="-30" y1="340" x2="430" y2="345" stroke="var(--rdm-map-road)" stroke-width="2.5" opacity="0.7"/>
+          <line x1="40" y1="-30" x2="50" y2="430" stroke="var(--rdm-map-road)" stroke-width="2.5" opacity="0.7"/>
+          <line x1="140" y1="-30" x2="155" y2="430" stroke="var(--rdm-map-road)" stroke-width="2.5" opacity="0.7"/>
+          <line x1="260" y1="-30" x2="275" y2="430" stroke="var(--rdm-map-road)" stroke-width="2.5" opacity="0.7"/>
+          <line x1="370" y1="-30" x2="385" y2="430" stroke="var(--rdm-map-road)" stroke-width="2.5" opacity="0.7"/>
+
+          <!-- Building blocks -->
+          <rect x="100" y="200" width="50" height="55" fill="#E3E6E0" rx="2"/>
+          <rect x="225" y="200" width="40" height="55" fill="#E3E6E0" rx="2"/>
+          <rect x="280" y="240" width="35" height="40" fill="#E3E6E0" rx="2"/>
+          <rect x="225" y="310" width="35" height="25" fill="#E3E6E0" rx="2"/>
+          <rect x="280" y="310" width="55" height="30" fill="#E3E6E0" rx="2"/>
+          <rect x="100" y="295" width="55" height="35" fill="#E3E6E0" rx="2"/>
+
+          <!-- ====== COMPETITOR PINS (rust teardrops, prominent) ====== -->
+          <!-- Pin 1: upper-center -->
+          <g class="pin pin-comp-1 drop" transform="translate(195, 160)">
+            <g class="pin-marker">
+              <path d="M 0 18 L -13 -4 A 13 13 0 1 1 13 -4 Z" fill="var(--rdm-rust)" stroke="#7A2A0F" stroke-width="1.5"/>
+              <circle cx="0" cy="-6" r="9" fill="#fff"/>
+              <text x="0" y="-2.5" text-anchor="middle" font-family="DM Sans" font-size="12" font-weight="700" fill="var(--rdm-rust)">1</text>
+            </g>
+          </g>
+          <!-- Pin 2: right-middle -->
+          <g class="pin pin-comp-2 drop" transform="translate(290, 220)">
+            <g class="pin-marker">
+              <path d="M 0 18 L -13 -4 A 13 13 0 1 1 13 -4 Z" fill="var(--rdm-rust)" stroke="#7A2A0F" stroke-width="1.5"/>
+              <circle cx="0" cy="-6" r="9" fill="#fff"/>
+              <text x="0" y="-2.5" text-anchor="middle" font-family="DM Sans" font-size="12" font-weight="700" fill="var(--rdm-rust)">2</text>
+            </g>
+          </g>
+          <!-- Pin 3: lower-center -->
+          <g class="pin pin-comp-3 drop" transform="translate(155, 300)">
+            <g class="pin-marker">
+              <path d="M 0 18 L -13 -4 A 13 13 0 1 1 13 -4 Z" fill="var(--rdm-rust)" stroke="#7A2A0F" stroke-width="1.5"/>
+              <circle cx="0" cy="-6" r="9" fill="#fff"/>
+              <text x="0" y="-2.5" text-anchor="middle" font-family="DM Sans" font-size="12" font-weight="700" fill="var(--rdm-rust)">3</text>
+            </g>
+          </g>
+
+          <!-- ====== YOUR PIN (dim, off to the side, marked unknown) ====== -->
+          <g class="pin pin-you drop" transform="translate(55, 75)">
+            <g class="pin-marker">
+              <path d="M 0 14 L -10 -3 A 10 10 0 1 1 10 -3 Z" fill="#B0B5AE" stroke="#6B7280" stroke-width="1.2" stroke-dasharray="2.5 1.5" opacity="0.85"/>
+              <circle cx="0" cy="-5" r="6.5" fill="#fff" opacity="0.9"/>
+              <text x="0" y="-2" text-anchor="middle" font-family="DM Sans" font-size="10" font-weight="700" fill="#6B7280">?</text>
+            </g>
+          </g>
+        </svg>
+
+        <!-- Page indicator -->
+        <div class="page-indicator">
+          You're here <span class="arrow">→</span> Page 2
+        </div>
+      </div>
+
+      <!-- LOCAL PACK (right) -->
+      <div class="pack-panel">
+        <div class="pack-header">
+          <div class="pack-header-tag">
+            <span class="pack-header-tag-dot"></span>
+            Local results
+          </div>
+          <span class="pack-header-link">More places →</span>
+        </div>
+
+        <!-- Competitor 1 -->
+        <div class="pack-card pack-card-1 reveal">
+          <div class="pack-rank">1</div>
+          <div class="pack-body">
+            <div class="pack-name">Summit Service Co.</div>
+            <div class="pack-meta">
+              <span class="pack-rating">
+                <span class="pack-star">★</span>
+                4.8
+              </span>
+              <span class="pack-reviews">(247)</span>
+              <span class="pack-sep">·</span>
+              <span class="pack-status">Open now</span>
+            </div>
+          </div>
+          <div class="pack-photo"></div>
+        </div>
+
+        <!-- Competitor 2 -->
+        <div class="pack-card pack-card-2 reveal">
+          <div class="pack-rank">2</div>
+          <div class="pack-body">
+            <div class="pack-name">Cornerstone &amp; Co.</div>
+            <div class="pack-meta">
+              <span class="pack-rating">
+                <span class="pack-star">★</span>
+                4.6
+              </span>
+              <span class="pack-reviews">(183)</span>
+              <span class="pack-sep">·</span>
+              <span class="pack-status">Open now</span>
+            </div>
+          </div>
+          <div class="pack-photo"></div>
+        </div>
+
+        <!-- Competitor 3 -->
+        <div class="pack-card pack-card-3 reveal">
+          <div class="pack-rank">3</div>
+          <div class="pack-body">
+            <div class="pack-name">Bluepeak Services</div>
+            <div class="pack-meta">
+              <span class="pack-rating">
+                <span class="pack-star">★</span>
+                4.2
+              </span>
+              <span class="pack-reviews">(89)</span>
+              <span class="pack-sep">·</span>
+              <span class="pack-status">Open now</span>
+            </div>
+          </div>
+          <div class="pack-photo"></div>
+        </div>
+
+        <!-- Divider with "Page 2" label -->
+        <div class="pack-divider"></div>
+
+        <!-- YOUR business — buried, incomplete -->
+        <div class="you-card reveal">
+          <div class="you-rank">?</div>
+          <div class="pack-body">
+            <div class="you-name">
+              Your business
+              <span class="you-badge">Unranked</span>
+            </div>
+            <div class="you-meta">
+              <span class="missing">No reviews</span>
+              <span class="pack-sep">·</span>
+              <span class="missing">Hours missing</span>
+              <span class="pack-sep">·</span>
+              <span class="missing">Address mismatch</span>
+            </div>
+          </div>
+          <div class="you-photo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Issue callouts -->
+        <div class="issues-strip">
+          <div class="issue">
+            <svg class="issue-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+            Incomplete GBP
+          </div>
+          <div class="issue">
+            <svg class="issue-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+            Inconsistent citations
+          </div>
+        </div>
+
+      </div><!-- /.pack-panel -->
+
+      </div><!-- /.composition -->
+    </div><!-- /.card -->
+  </div><!-- /.stage -->
+
+<script>
+  // Type out the search query
+  (function() {
+    const query = '"electrician near me"';
+    const target = document.getElementById('typedText');
+    const wrap = document.getElementById('searchQuery');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (reduced) {
+      target.textContent = query;
+      wrap.classList.add('done');
+      return;
+    }
+
+    let i = 0;
+    function tick() {
+      if (i <= query.length) {
+        target.textContent = query.slice(0, i);
+        i++;
+        setTimeout(tick, 55);
+      } else {
+        wrap.classList.add('done');
+      }
+    }
+    setTimeout(tick, 500);
+  })();
+</script>
+</body>
+</html>

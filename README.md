@@ -9,6 +9,7 @@ Each animation lives in its own folder and is loaded into the marketing site via
 | Animation | Folder | Live URL |
 |---|---|---|
 | The SEO / GEO problem | [`seo-geo-problem/`](./seo-geo-problem/) | https://ridgelinedm.github.io/ridgeline-animations/seo-geo-problem/ |
+| The local SEO problem | [`local-seo-problem/`](./local-seo-problem/) | https://ridgelinedm.github.io/ridgeline-animations/local-seo-problem/ |
 
 ## Adding a new animation
 
