@@ -43,7 +43,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: clamp(20px, 3vw, 32px);
+    padding: clamp(24px, 4vw, 36px);
   }
 
   /* Subtle grid backdrop */
@@ -79,8 +79,8 @@
     border-radius: 14px;
     padding: clamp(20px, 3.5vw, 36px);
     box-shadow:
-      0 20px 50px rgba(1, 23, 47, 0.08),
-      0 8px 20px rgba(1, 23, 47, 0.04);
+      0 12px 32px rgba(1, 23, 47, 0.10),
+      0 4px 12px rgba(1, 23, 47, 0.06);
     opacity: 0;
     animation: cardFadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s forwards;
     display: flex;
@@ -190,12 +190,20 @@
     white-space: nowrap;
   }
 
-  /* Chart area takes remaining space */
+  /* Chart area takes remaining space.
+     Position relative so we can absolutely-position HTML labels over the SVG. */
   .chart-area {
     position: relative;
     width: 100%;
     flex: 1;
     min-height: 0;
+    padding-bottom: 22px; /* room for x-axis labels below SVG */
+  }
+
+  .chart-svg-wrap {
+    position: relative;
+    width: 100%;
+    height: 100%;
   }
 
   .chart-svg {
@@ -204,33 +212,85 @@
     overflow: visible;
   }
 
-  .y-label {
-    fill: var(--rdm-text-muted);
-    font-size: 10px;
+  /* Y-axis labels — HTML, sit to the left of the SVG */
+  .y-labels {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 22px;
+    width: 40px;
+    pointer-events: none;
+  }
+  .y-label-item {
+    position: absolute;
+    left: 0;
     font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
     font-weight: 500;
+    color: var(--rdm-text-muted);
+    letter-spacing: 0.02em;
     opacity: 0;
     animation: fadeIn 0.5s ease-out 0.9s forwards;
+    transform: translateY(-50%);
   }
+  .y-label-high { top: 12%; }
+  .y-label-mid  { top: 62%; }
+  .y-label-low  { top: 88%; }
 
-  .x-label {
-    fill: var(--rdm-text-muted);
-    font-size: 10px;
+  /* X-axis labels — HTML, sit below the SVG */
+  .x-labels {
+    position: absolute;
+    left: 40px;
+    right: 0;
+    bottom: 0;
+    height: 18px;
+    pointer-events: none;
+  }
+  .x-label-item {
+    position: absolute;
+    bottom: 0;
     font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
     font-weight: 600;
+    color: var(--rdm-text-muted);
     letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
     opacity: 0;
+    transform: translateX(-50%);
   }
-  .x-label-1 { animation: fadeIn 0.4s ease-out 1.0s forwards; }
-  .x-label-2 { animation: fadeIn 0.4s ease-out 1.15s forwards; }
-  .x-label-3 { animation: fadeIn 0.4s ease-out 1.3s forwards; }
-  .x-label-4 { animation: fadeIn 0.4s ease-out 1.45s forwards; }
-  .x-label-5 { animation: fadeIn 0.4s ease-out 1.6s forwards; }
-  .x-label-6 { animation: fadeIn 0.4s ease-out 1.75s forwards; }
+  .x-label-item.x1 { left: 5%;  animation: fadeIn 0.4s ease-out 1.0s forwards; }
+  .x-label-item.x2 { left: 23%; animation: fadeIn 0.4s ease-out 1.15s forwards; }
+  .x-label-item.x3 { left: 44%; animation: fadeIn 0.4s ease-out 1.3s forwards; }
+  .x-label-item.x4 { left: 62%; animation: fadeIn 0.4s ease-out 1.45s forwards; }
+  .x-label-item.x5 { left: 80%; animation: fadeIn 0.4s ease-out 1.6s forwards; }
+  .x-label-item.x6 { left: 96%; animation: fadeIn 0.4s ease-out 1.75s forwards; }
 
-  /* Hide secondary x-labels on tablet/mobile */
-  .x-label.tablet-hide { /* hidden below */ }
-  .x-label.mobile-hide { /* hidden below */ }
+  /* Endpoint labels — HTML, positioned near the line endpoints */
+  .endpoint-html-label {
+    position: absolute;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-100%, 0);
+  }
+  .endpoint-html-label.competitor {
+    color: var(--rdm-rust);
+    right: 0;
+    top: 5%;
+    animation: fadeIn 0.5s ease-out 4.3s forwards;
+  }
+  .endpoint-html-label.you {
+    color: var(--rdm-text-muted);
+    right: 0;
+    bottom: 35px;
+    animation: fadeIn 0.5s ease-out 3.8s forwards;
+  }
 
   .grid-line {
     stroke: rgba(1, 23, 47, 0.06);
@@ -319,22 +379,9 @@
     100% { opacity: 0.25; r: 24; }
   }
 
-  /* Inline line labels */
+  /* Inline line labels (legacy SVG version — kept for backwards compat but no longer used) */
   .line-label {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    opacity: 0;
-  }
-  .line-label-competitor {
-    fill: var(--rdm-rust);
-    animation: fadeIn 0.5s ease-out 4.3s forwards;
-  }
-  .line-label-you {
-    fill: var(--rdm-text-muted);
-    animation: fadeIn 0.5s ease-out 3.8s forwards;
+    display: none;
   }
 
   /* Footer caption */
@@ -371,8 +418,8 @@
       gap: 16px;
     }
     /* Hide every other x-label on tablet for breathing room */
-    .x-label-2,
-    .x-label-4 {
+    .x-label-item.x2,
+    .x-label-item.x4 {
       display: none;
     }
   }
@@ -382,7 +429,7 @@
      ============================================ */
   @media (max-width: 600px) {
     .stage {
-      padding: 16px;
+      padding: 20px;
     }
     .chart-card {
       padding: 16px 16px;
@@ -395,7 +442,6 @@
       gap: 10px;
       margin-bottom: 12px;
     }
-    /* Hide subtitle on mobile to save space */
     .chart-subtitle {
       display: none;
     }
@@ -411,24 +457,22 @@
     .stat:last-child {
       text-align: right;
     }
-    /* Smaller stat numbers so chart gets more room */
     .stat-num {
       font-size: 14px;
     }
     /* Reduce x-label density */
-    .x-label-2,
-    .x-label-3,
-    .x-label-5 {
+    .x-label-item.x2,
+    .x-label-item.x3,
+    .x-label-item.x5 {
       display: none;
     }
-    .line-label {
+    .endpoint-html-label {
       font-size: 10px;
     }
-    .y-label,
-    .x-label {
+    .y-label-item,
+    .x-label-item {
       font-size: 9px;
     }
-    /* Tighter footer */
     .chart-footer {
       margin-top: 10px;
       padding-top: 10px;
@@ -444,12 +488,24 @@
   @media (max-width: 400px) {
     .chart-card { padding: 14px 14px; }
     .chart-subtitle { display: none; }
-    /* Only show first and last x-labels */
-    .x-label-2,
-    .x-label-3,
-    .x-label-4,
-    .x-label-5 {
+    .x-label-item.x2,
+    .x-label-item.x3,
+    .x-label-item.x4,
+    .x-label-item.x5 {
       display: none;
+    }
+  }
+
+  /* ============================================
+     SHORT — for short iframe heights
+     ============================================ */
+  @media (max-height: 420px) {
+    .chart-card { padding: 16px 18px; }
+    .chart-header { margin-bottom: 12px; }
+    .chart-subtitle { display: none; }
+    .chart-footer {
+      margin-top: 10px;
+      padding-top: 10px;
     }
   }
 
@@ -500,52 +556,58 @@
       </div>
 
       <div class="chart-area">
-        <svg class="chart-svg" viewBox="0 0 800 320" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="compGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#AF4319" stop-opacity="0.4"/>
-              <stop offset="100%" stop-color="#AF4319" stop-opacity="0"/>
-            </linearGradient>
-          </defs>
+        <!-- HTML Y-axis labels — never get distorted by SVG scaling -->
+        <div class="y-labels">
+          <div class="y-label-item y-label-high">HIGH</div>
+          <div class="y-label-item y-label-mid">MID</div>
+          <div class="y-label-item y-label-low">LOW</div>
+        </div>
 
-          <!-- Y-axis labels -->
-          <text class="y-label" x="0" y="40">HIGH</text>
-          <text class="y-label" x="0" y="200">MID</text>
-          <text class="y-label" x="0" y="280">LOW</text>
+        <div class="chart-svg-wrap">
+          <svg class="chart-svg" viewBox="0 0 800 320" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="compGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#AF4319" stop-opacity="0.4"/>
+                <stop offset="100%" stop-color="#AF4319" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
 
-          <!-- Grid lines -->
-          <line class="grid-line" x1="40" y1="40" x2="800" y2="40"/>
-          <line class="grid-line" x1="40" y1="200" x2="800" y2="200"/>
-          <line class="grid-line" x1="40" y1="280" x2="800" y2="280"/>
+            <!-- Grid lines -->
+            <line class="grid-line" x1="40" y1="40" x2="800" y2="40"/>
+            <line class="grid-line" x1="40" y1="200" x2="800" y2="200"/>
+            <line class="grid-line" x1="40" y1="280" x2="800" y2="280"/>
 
-          <!-- X-axis labels (some hide on smaller screens via CSS) -->
-          <text class="x-label x-label-1" x="80" y="310" text-anchor="middle">12 MO AGO</text>
-          <text class="x-label x-label-2" x="220" y="310" text-anchor="middle">10 MO</text>
-          <text class="x-label x-label-3" x="360" y="310" text-anchor="middle">8 MO</text>
-          <text class="x-label x-label-4" x="500" y="310" text-anchor="middle">6 MO</text>
-          <text class="x-label x-label-5" x="640" y="310" text-anchor="middle">3 MO</text>
-          <text class="x-label x-label-6" x="760" y="310" text-anchor="middle">TODAY</text>
+            <!-- Competitor fill -->
+            <path class="competitor-fill" d="M 80,265 C 130,260 170,250 220,235 C 270,220 310,195 360,170 C 410,150 450,130 500,105 C 550,85 590,65 640,50 C 690,35 720,28 760,22 L 760,290 L 80,290 Z"/>
 
-          <!-- Competitor fill -->
-          <path class="competitor-fill" d="M 80,265 C 130,260 170,250 220,235 C 270,220 310,195 360,170 C 410,150 450,130 500,105 C 550,85 590,65 640,50 C 690,35 720,28 760,22 L 760,290 L 80,290 Z"/>
+            <!-- "Your" noisy spiky line -->
+            <path class="line-you" d="M 80,285 L 95,285 L 105,275 L 115,283 L 125,285 L 135,278 L 145,272 L 155,285 L 165,283 L 175,265 L 185,270 L 195,285 L 205,285 L 215,280 L 225,272 L 235,265 L 245,283 L 255,285 L 265,278 L 275,285 L 285,275 L 295,282 L 305,285 L 315,272 L 325,285 L 335,283 L 345,270 L 355,285 L 365,278 L 375,265 L 385,283 L 395,285 L 405,272 L 415,285 L 425,280 L 435,275 L 445,285 L 455,283 L 465,268 L 475,278 L 485,285 L 495,275 L 505,283 L 515,272 L 525,285 L 535,278 L 545,283 L 555,270 L 565,285 L 575,283 L 585,275 L 595,285 L 605,272 L 615,283 L 625,278 L 635,285 L 645,275 L 655,283 L 665,260 L 675,275 L 685,285 L 695,278 L 705,283 L 715,272 L 725,285 L 735,275 L 745,283 L 760,278"/>
 
-          <!-- "Your" noisy spiky line -->
-          <path class="line-you" d="M 80,285 L 95,285 L 105,275 L 115,283 L 125,285 L 135,278 L 145,272 L 155,285 L 165,283 L 175,265 L 185,270 L 195,285 L 205,285 L 215,280 L 225,272 L 235,265 L 245,283 L 255,285 L 265,278 L 275,285 L 285,275 L 295,282 L 305,285 L 315,272 L 325,285 L 335,283 L 345,270 L 355,285 L 365,278 L 375,265 L 385,283 L 395,285 L 405,272 L 415,285 L 425,280 L 435,275 L 445,285 L 455,283 L 465,268 L 475,278 L 485,285 L 495,275 L 505,283 L 515,272 L 525,285 L 535,278 L 545,283 L 555,270 L 565,285 L 575,283 L 585,275 L 595,285 L 605,272 L 615,283 L 625,278 L 635,285 L 645,275 L 655,283 L 665,260 L 675,275 L 685,285 L 695,278 L 705,283 L 715,272 L 725,285 L 735,275 L 745,283 L 760,278"/>
+            <!-- "Competitor" climbing line -->
+            <path class="line-competitor" d="M 80,265 C 130,260 170,250 220,235 C 270,220 310,195 360,170 C 410,150 450,130 500,105 C 550,85 590,65 640,50 C 690,35 720,28 760,22"/>
 
-          <!-- "Competitor" climbing line -->
-          <path class="line-competitor" d="M 80,265 C 130,260 170,250 220,235 C 270,220 310,195 360,170 C 410,150 450,130 500,105 C 550,85 590,65 640,50 C 690,35 720,28 760,22"/>
+            <!-- Endpoint: You -->
+            <circle class="endpoint-you" cx="760" cy="278" r="4"/>
 
-          <!-- Inline labels next to endpoints -->
-          <text class="line-label line-label-you" x="745" y="270" text-anchor="end">YOU</text>
-          <text class="line-label line-label-competitor" x="745" y="14" text-anchor="end">COMPETITOR</text>
+            <!-- Endpoint: Competitor -->
+            <circle class="endpoint-ring" cx="760" cy="22" r="4"/>
+            <circle class="endpoint-competitor" cx="760" cy="22" r="6"/>
+          </svg>
 
-          <!-- Endpoint: You -->
-          <circle class="endpoint-you" cx="760" cy="278" r="4"/>
+          <!-- HTML endpoint labels — never get distorted -->
+          <div class="endpoint-html-label competitor">COMPETITOR</div>
+          <div class="endpoint-html-label you">YOU</div>
+        </div>
 
-          <!-- Endpoint: Competitor -->
-          <circle class="endpoint-ring" cx="760" cy="22" r="4"/>
-          <circle class="endpoint-competitor" cx="760" cy="22" r="6"/>
-        </svg>
+        <!-- HTML X-axis labels — never get distorted by SVG scaling -->
+        <div class="x-labels">
+          <div class="x-label-item x1">12 MO AGO</div>
+          <div class="x-label-item x2">10 MO</div>
+          <div class="x-label-item x3">8 MO</div>
+          <div class="x-label-item x4">6 MO</div>
+          <div class="x-label-item x5">3 MO</div>
+          <div class="x-label-item x6">TODAY</div>
+        </div>
       </div>
 
       <div class="chart-footer">
